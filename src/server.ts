@@ -1,5 +1,4 @@
 import { Server } from '@modelcontextprotocol/sdk/server';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
@@ -18,7 +17,7 @@ import {
     PlaylistItemsParams,
 } from './types.js';
 
-export async function startMcpServer() {
+export function createMcpServer() {
     const server = new Server(
         {
             name: 'zubeid-youtube-mcp-server',
@@ -253,6 +252,13 @@ export async function startMcpServer() {
         }
     });
 
+    return server;
+}
+
+export async function startMcpServer() {
+    const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
+    const server = createMcpServer();
+    
     // Create transport and connect
     const transport = new StdioServerTransport();
     await server.connect(transport);

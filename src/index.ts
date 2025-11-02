@@ -1,4 +1,7 @@
 import { startMcpServer } from './server.js';
+import { config } from 'dotenv';
+
+await config();
 
 // Check for required environment variables
 if (!process.env.YOUTUBE_API_KEY) {
@@ -7,12 +10,23 @@ if (!process.env.YOUTUBE_API_KEY) {
     process.exit(1);
 }
 
-// Start the MCP server
-startMcpServer()
-    .then(() => {
-        console.log('YouTube MCP Server started successfully');
-    })
-    .catch(error => {
-        console.error('Failed to start YouTube MCP Server:', error);
+// Check transport mode: 'http' for HTTP mode, anything else (or unset) for stdio mode
+const transportMode = process.env.MCP_TRANSPORT || 'stdio';
+
+if (transportMode === 'http') {
+    // Start HTTP server
+    import('./http.js').catch(error => {
+        console.error('Failed to start HTTP server:', error);
         process.exit(1);
     });
+} else {
+    // Start stdio server (default)
+    startMcpServer()
+        .then(() => {
+            console.log('YouTube MCP Server started successfully');
+        })
+        .catch(error => {
+            console.error('Failed to start YouTube MCP Server:', error);
+            process.exit(1);
+        });
+}
